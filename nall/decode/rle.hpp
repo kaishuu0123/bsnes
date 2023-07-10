@@ -12,7 +12,18 @@ inline auto RLE(array_view<uint8_t> input) -> vector<uint8_t> {
 
   uint base = 0;
   uint64_t size = 0;
-  for(uint byte : range(8)) size |= load() << byte * 8;
+  /**
+   * XXX:
+   *  kaishuu0123:
+   *    Fixed a bug that prevented Load State from working with Apple Silicon?
+   *    Not sure if it is a compiler bug or depends on the CPU architecture it runs on.
+   */
+  // for(uint byte : range(8)) size |= load() << byte * 8;
+  for(uint byte : range(8)) {
+    auto v = load();
+    auto res = ((uint64_t)v << (byte * 8));
+    size = size | res;
+  }
   output.resize(size);
 
   auto read = [&]() -> uint64_t {
